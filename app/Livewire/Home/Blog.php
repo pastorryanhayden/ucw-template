@@ -18,38 +18,41 @@ class Blog extends Component
 
     public function mount()
     {
+        // Initialize defaults
+        $this->show = false;
+        $this->post = null;
+        
+        // Check for featured post first
         $featured = BlogPost::where("permenantly_featured", true)
             ->orderBy("created_at", "desc")
             ->first();
+            
         if ($featured) {
             $this->show = true;
             $this->featured = true;
             $this->post = $featured;
-        } else {
-            if (BlogPost::all()->count() > 0) {
-                $this->post = BlogPost::orderBy("created_at", "desc")->first();
-            }
-            // Check if the most recent post exists
-            if ($this->post) {
-                // Get the current date and time
-                $now = Carbon::now();
-
-                // Calculate the difference in days
-                $difference = $now->diffInDays($this->post->created_at);
-
-                // Check if the post is less than two weeks old
-                if ($difference < 14) {
-                    // The post is less than two weeks old
-                    $this->show = true;
-                } else {
-                    // The post is older than two weeks
-                    $this->show = false;
-                }
-            } else {
-                // No posts found
-                $this->show = false;
+            return;
+        }
+        
+        // No featured post, check for recent posts
+        $recentPost = BlogPost::orderBy("created_at", "desc")->first();
+        
+        if ($recentPost) {
+            $this->post = $recentPost;
+            
+            // Get the current date and time
+            $now = Carbon::now();
+            
+            // Calculate the difference in days
+            $difference = $now->diffInDays($this->post->created_at);
+            
+            // Check if the post is less than two weeks old
+            if ($difference < 14) {
+                $this->show = true;
             }
         }
+        
+        // If no posts exist or post is too old, $this->show remains false
     }
 
     public function render()
