@@ -18,17 +18,17 @@ class Blog extends Component
 
     public function mount()
     {
-
-        $featured = BlogPost::where('permenantly_featured', true)->orderBy('created_at', 'desc')->first();
+        $featured = BlogPost::where("permenantly_featured", true)
+            ->orderBy("created_at", "desc")
+            ->first();
         if ($featured) {
             $this->show = true;
             $this->featured = true;
             $this->post = $featured;
-
         } else {
-
-            $this->post = BlogPost::orderBy('created_at', 'desc')->first();
-
+            if (BlogPost::all()->count() > 0) {
+                $this->post = BlogPost::orderBy("created_at", "desc")->first();
+            }
             // Check if the most recent post exists
             if ($this->post) {
                 // Get the current date and time
@@ -49,12 +49,11 @@ class Blog extends Component
                 // No posts found
                 $this->show = false;
             }
-
         }
     }
 
     public function render()
     {
-        return view('livewire.home.blog');
+        return view("livewire.home.blog");
     }
 }
